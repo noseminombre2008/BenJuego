@@ -1,9 +1,59 @@
-<script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+<script setup>
+import { ref } from 'vue'
+import card from '../components/Card.vue'
+
+let character = ref([])
+let page = ref(1)
+
+function nextPage() {
+  page.value++
+  loadCharacters()
+}
+
+function previousPage() {
+  page.value--
+  if (page.value < 1) {
+    page.value = 1
+  }
+  loadCharacters()
+}
+
+async function loadCharacters() {
+  const response = await fetch(`https://ben10-api.herokuapp.com/random?page=${page.value}`)
+  const data = await response.json()
+  character.value = data.results
+  console.log(data)
+}
+
+loadCharacters()
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="flex justify-center mb-12 mt-10">
+    <h1 class="text-3xl md:text-5xl text-rose-950">Personajes de Ben 10</h1>
+  </div>
+
+  <div class="flex justify-center items-center m-4 space-x-4">
+    <button
+      class="bg-gray-300 rounded-xl text-center p-4"
+      @click="previousPage"
+      :disabled="page === 1"
+    >
+      Pagina anterior
+    </button>
+    <div class="text-3xl">{{ page }}</div>
+    <button class="bg-gray-300 rounded-xl text-center p-4" @click="nextPage">
+      Siguiente pagina
+    </button>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-5 grid-cols-2 m-6">
+    <router-link v-for="personaje in character" :key="character.id" :to="`/${personaje.id}`">
+      <card :character="personaje"></card>
+    </router-link>
+  </div>
+
+  <br /><br />
+
+  <!--<Card character="character"/>-->
 </template>
